@@ -6,16 +6,22 @@ function login(e){
         email: email.value,
         pass: password.value
     }
-    console.log(userDetail)
 
     axios.post('http://localhost:3000/login', userDetail)
     .then(response=>{
-        console.log(response.status)
         if(response.status === 200){
             localStorage.setItem('token', response.data.token)
-            location.href = "./expense.html"
+            alert('login succesful')
         }
-    }).catch(err=>{console.log(err)})
+       
+    }).catch(err=>{
+        if(err.code === 'ERR_BAD_REQUEST'){
+            alert('user not found')
+        }
+        else{
+        alert('wrong password')
+        }
+        console.log(err)})
 }
 
 const button = document.getElementById('btn')
