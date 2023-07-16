@@ -13,11 +13,14 @@ function postLogin(event){
 
     axios.post('http://localhost:3000/signup', userDetail)
      .then(response=>{
-         if(response.status == 201) location.href="./login.html"
+         if(response.status == 201){
+            alert('User sucessfully signed up')
+            location.href="./login.html"
+         }
        
      })
      .catch(err=>{
-        alert('User already registered')
+        alert('User already registered Please Login')
         })
 }
 
