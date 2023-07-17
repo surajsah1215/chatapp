@@ -11,6 +11,7 @@ function login(e){
     .then(response=>{
         if(response.status === 200){
             localStorage.setItem('token', response.data.token)
+            location.href="../chat/chat.html"
             alert('login succesful')
         }
        
