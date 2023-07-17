@@ -13,9 +13,14 @@ app.use(express.json());
 
 const sequelize = require('./util/database');
 const User = require('./models/user')
+const Message  = require('./models/message')
 
 const userRoute = require('./routes/user')
 app.use(userRoute)
+
+User.hasMany(Message)
+Message.belongsTo(User)
+
 
 sequelize.sync()
  .then((response)=>app.listen(process.env.PORT||3000))
