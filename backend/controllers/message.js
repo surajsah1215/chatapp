@@ -24,3 +24,16 @@ exports.messageSent = async(req,res,next)=>{
     }
 
 }
+
+
+exports.getMessages = async(req,res,next)=>{
+    try{
+        const allMessages = await Message.findAll({attributes:['message']})
+        return res.status(200).json({message:allMessages})
+    }
+    catch(err){
+        res.status(404).res.json({message:'cannot find messages'})
+    }
+
+    
+}
