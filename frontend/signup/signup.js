@@ -15,7 +15,7 @@ function postLogin(event){
      .then(response=>{
          if(response.status == 201){
             alert('User sucessfully signed up')
-            location.href="./login.html"
+            location.href="../login/login.html"
          }
        
      })
