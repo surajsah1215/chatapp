@@ -53,3 +53,13 @@ body {
     font-size: 16px;
   }
   
+  .create-group {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px 20px;
+    background-color: #056940;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
