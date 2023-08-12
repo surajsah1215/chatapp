@@ -63,3 +63,11 @@ body {
     border: none;
     border-radius: 4px;
   }
+
+  #groupsListContainer {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #7ada71;
+    padding: 10px;
+    background-color: #9ae064;
+  }
