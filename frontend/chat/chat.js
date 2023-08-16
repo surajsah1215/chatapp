@@ -4,6 +4,21 @@ const sendButton = document.getElementById('send-button');
 const messageList = document.getElementById('messagesList')
 const createGroupButton = document.getElementById('createGroup')
 
+const socket = io("http://localhost:3000");
+
+socket.on("message", (msg, userName, groupId) => {
+	if (localStorage.getItem("currentGroupId")) {
+		let gId = localStorage.getItem("currentGroupId");
+		if (groupId == gId) {
+			let newpara = document.createElement("p");
+			newpara.innerText = `${userName}: ${msg}`;
+			document.querySelector("#chatDiv").appendChild(newpara);
+		}
+	}
+});
+
+
+
 function showMessages(obj) {
     // messageList.innerText = ''
     // console.log(obj)
@@ -51,13 +66,12 @@ function showMessages(obj) {
 
 
 async function messageSent(e){
-
-const token = localStorage.getItem('token')
-messageObj={
-    mess : messageInput.value
-}    
-localStorage.setItem('messages', `${messageInput.value}`)
- const response = await axios.post('http://localhost:3000/messageSend',messageObj, {headers:{"authorization":token}})
+	const token = localStorage.getItem('token')
+	messageObj={
+		mess : messageInput.value
+	}    
+	localStorage.setItem('messages', `${messageInput.value}`)
+	const response = await axios.post('http://localhost:3000/messageSend',messageObj, {headers:{"authorization":token}})
 
 }
 

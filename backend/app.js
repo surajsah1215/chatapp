@@ -4,10 +4,14 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
+const http = require("http").Server(app);
+const io = require("socket.io")(http, { cors: { origin: "*" } });
+app.use(cors());
 
-app.use(cors({
-    origin:'http://127.0.0.1:5500'
-}));
+const socketIO = require("./sockets/socket");
+socketIO(io);
+
+
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(express.json());
 
