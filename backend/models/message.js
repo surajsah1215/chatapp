@@ -9,7 +9,12 @@ const Message = sequelize.define('message',{
         primaryKey:true
     },
     message: DataTypes.STRING,
-    
+    name:{
+        type:DataTypes.STRING
+    },
+    type:{
+        type:DataTypes.STRING
+    }
 
 
 })

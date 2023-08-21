@@ -3,7 +3,10 @@ module.exports = (io)=>{
         socket.on("message", (msg, userName, groupId) => {
             io.emit("message", msg, userName, groupId);
           });   // Handle custom events from the client
-
+        
+        socket.on("file", (msg, userName, groupId) => {
+            io.emit("file", msg, userName, groupId);
+        });  
 
     })
 }

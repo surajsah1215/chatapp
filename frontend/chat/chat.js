@@ -1,9 +1,3 @@
-const chat_area = document.getElementById('chat-area')
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const messageList = document.getElementById('messagesList')
-const createGroupButton = document.getElementById('createGroup')
-
 const socket = io("http://localhost:3000");
 
 socket.on("message", (msg, userName, groupId) => {
@@ -17,80 +11,28 @@ socket.on("message", (msg, userName, groupId) => {
 	}
 });
 
+socket.on("file", (msg, userName, groupId) => {
+	if (localStorage.getItem("currentGroupId")) {
+		let gId = localStorage.getItem("currentGroupId");
+		if (groupId == gId) {
+			let newpara = document.createElement("p");
 
+			let fileLink = document.createElement("a");
+			fileLink.href = msg;
+			fileLink.innerText = "Download File";
 
-function showMessages(obj) {
-    // messageList.innerText = ''
-    // console.log(obj)
-    const messageElement = document.createElement('li');
-    messageElement.textContent = `${obj.userName} - `+`${obj.text}`
-    messageList.appendChild(messageElement).scrollHeight;
-  }
+			newpara.appendChild(document.createTextNode(`${userName}: `));
+			newpara.appendChild(fileLink);
 
-  function parseJwt(token) {
-    var base64Url = token.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
-        .split("")
-        .map(function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  }
+			document.querySelector("#chatDiv").appendChild(newPara);
+		}
+	}
+});
 
-  async function fetchAndShowMessages() {
-    try {
-      const response = await axios.get('http://localhost:3000/allmessages');
-      const messages = response.data;
-      for (let i = 0; i < messages.length; i++) {
-        showMessages(messages[i]);
-        localStorage.setItem( messages[i].id,messages[i].text);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }
-
-
-//   setInterval(fetchAndShowMessages, 1000);
-
-  window.addEventListener('DOMContentLoaded', (e)=>{
-    fetchAndShowMessages()
-    // getAllGroups()
-    displayGroupsLeft()
-  } );
-
-
-async function messageSent(e){
-	const token = localStorage.getItem('token')
-	messageObj={
-		mess : messageInput.value
-	}    
-	localStorage.setItem('messages', `${messageInput.value}`)
-	const response = await axios.post('http://localhost:3000/messageSend',messageObj, {headers:{"authorization":token}})
-
-}
-
-sendButton.addEventListener('click',messageSent)
-
-createGroupButton.addEventListener('click',createNewGroup)
-
-async function createNewGroup(){
-  try{
-    const groupName = prompt("Enter the name of group:");
-    let token = localStorage.getItem('token')
-    let response  = await axios.post('http://localhost:3000/groups',{groupName},{headers:{"authorization":token}})
-    showMessageDiv(response.data.msg);
-
-  }
-  catch(error){
-    showMessageDiv(error.response.data.msg);
-  }
-}
+window.addEventListener("DOMContentLoaded", (e) => {
+	displayGroupsLeft();
+	loadChats();
+});
 
 function showMessageDiv(text) {
 	let head2 = document.createElement("h2");
@@ -101,12 +43,50 @@ function showMessageDiv(text) {
 	}, 3000);
 }
 
+document.querySelector("#createGroupButton").addEventListener("click", async (e) => {
+	e.preventDefault();
+
+	createNewGroup();
+});
+
+function parseJwt(token) {
+	var base64Url = token.split(".")[1];
+	var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+	var jsonPayload = decodeURIComponent(
+		window
+			.atob(base64)
+			.split("")
+			.map(function (c) {
+				return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+			})
+			.join("")
+	);
+	return JSON.parse(jsonPayload);
+}
+
+async function createNewGroup(e) {
+	try {
+		const groupName = prompt("Enter the name of group:");
+
+		if (groupName) {
+			let token = localStorage.getItem("token");
+			let response = await axios.post("http://localhost:3000/groups", { groupName }, { headers: { authorization: token } });
+			showMessageDiv(response.data.msg);
+			displayGroupsLeft();
+		} else {
+			console.log("no member");
+		}
+	} catch (error) {
+		console.log(error);
+		showMessageDiv(error.response.data.msg);
+	}
+}
 
 async function getAllGroups() {
 	try {
 		let token = localStorage.getItem("token");
 		let response = await axios.get("http://localhost:3000/groups", { headers: { authorization: token } });
-    console.log(response.data)
+		// console.log(response)
 		return response.data;
 	} catch (error) {
 		console.log(error);
@@ -115,7 +95,7 @@ async function getAllGroups() {
 
 async function displayGroupsLeft() {
 	try {
-		let userId = parseJwt(localStorage.getItem("token")).id;//will get the userId
+		let userId = parseJwt(localStorage.getItem("token")).id;
 		let groups = await getAllGroups();
 		let ul = document.createElement("ul");
 		for (let i = 0; i < groups.length; i++) {
@@ -148,7 +128,7 @@ async function displayGroupsLeft() {
 			}
 			let openChatbutton = document.createElement("button");
 			openChatbutton.textContent = "open chat";
-			// openChatbutton.addEventListener("click", groupChatPage);
+			openChatbutton.addEventListener("click", groupChatPage);
 			li.appendChild(openChatbutton);
 			ul.appendChild(li);
 		}
@@ -160,34 +140,15 @@ async function displayGroupsLeft() {
 	}
 }
 
-
-async function addMembers(e){
-	try{
-		let groupid = e.target.parentElement.getAttribute("groupId");
-		const memberEmail = prompt("Enter member email")
-		if(memberEmail){
-			let token = localStorage.getItem("token");
-			let res = await axios.post("http://localhost:3000/groups/addmembers", { memberEmail, groupid }, { headers: { authorization: token } });
-			showMessageDiv(res.data.msg);
-		} else {
-			console.log("no member");
-		}
-
-	}
-	catch(error){
-		console.log(error);
-		showMessageDiv(error.response.data.msg);
-	}
-}
-
 async function kickMembers(e) {
 	try {
+		e.preventDefault();
 		let groupid = e.target.parentElement.getAttribute("groupId");
 		const memberEmail = prompt("Enter mail of person you want to kick out:");
 
 		if (memberEmail) {
-			// let token = localStorage.getItem("token");
-			let res = await axios.post("http://localhost:3000/groups/kickmembers", { memberEmail, groupid });
+			let token = localStorage.getItem("token");
+			let res = await axios.post("http://localhost:3000/groups/kickmembers", { memberEmail, groupid }, { headers: { authorization: token } });
 			showMessageDiv(res.data.msg);
 		} else {
 			console.log("no member");
@@ -220,11 +181,118 @@ async function changeAdmin(e) {
 		const memberEmail = prompt("Enter mail of person who you want to promote as admin");
 		if (memberEmail) {
 			let token = localStorage.getItem("token");
-			let res = await axios.patch("http://localhost:3000/groups/promoteAdmin", { memberEmail, groupid });
+			let res = await axios.patch("http://localhost:3000/groups/promoteAdmin", { memberEmail, groupid }, { headers: { authorization: token } });
 			showMessageDiv(res.data.msg);
 			displayGroupsLeft();
 		} else {
 			console.log("no member");
+		}
+	} catch (error) {
+		console.log(error);
+		showMessageDiv(error.response.data.msg);
+	}
+}
+
+async function addMembers(e) {
+	try {
+		e.preventDefault();
+		let groupid = e.target.parentElement.getAttribute("groupId");
+		const memberEmail = prompt("Enter member email:");
+		if (memberEmail) {
+			let token = localStorage.getItem("token");
+			let res = await axios.post("http://localhost:3000/groups/addmembers", { memberEmail, groupid }, { headers: { authorization: token } });
+
+			showMessageDiv(res.data.msg);
+		} else {
+			console.log("no member");
+		}
+	} catch (error) {
+		console.log(error);
+		showMessageDiv(error.response.data.msg);
+	}
+}
+
+
+async function groupChatPage(e) {
+	e.preventDefault();
+	let groupId = e.target.parentElement.getAttribute("groupId");
+	document.querySelector("#footer").style.visibility = "visible";
+	document.querySelector("#chatDiv").style.visibility = "visible";
+	localStorage.setItem("currentGroupId", groupId);
+	loadChats();
+}
+
+document.querySelector("#sendBtn").addEventListener("click", sendMsg);
+
+async function sendMsg(e) {
+	try {
+		e.preventDefault();
+		console.log(document.querySelector("#uploadBtn").files[0])
+		if (document.querySelector("#uploadBtn").files[0]) {
+			let token = localStorage.getItem("token");
+			let groupId = localStorage.getItem("currentGroupId");
+			let file = document.querySelector("#uploadBtn").files[0];
+			let formData = new FormData();
+			formData.append("file", file);
+			console.log('before')
+
+
+
+			let response = await axios.post(`http://localhost:3000/upload/${groupId}`, formData, { headers: { authorization: token }, "Content-Type": "multipart/form-data" });
+			
+			
+			
+			console.log('after');
+			// socket.emit("file", response.data.data, response.data.username, groupId);
+		} else {
+			let msg = document.querySelector("#inputText").value;
+			document.querySelector("#inputText").value = "";
+			let token = localStorage.getItem("token");
+			let groupId = localStorage.getItem("currentGroupId");
+			let response = await axios.post("http://localhost:3000/chat", { message: msg, groupId: groupId }, { headers: { authorization: token } });
+			socket.emit("message", msg, response.data.data, groupId);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function loadChats() {
+	try {
+		let token = localStorage.getItem("token");
+		let groupId = localStorage.getItem("currentGroupId");
+		let prevChats = await axios.get(`http://localhost:3000/chat/${groupId}`, { headers: { authorization: token } });
+		DisplayPrevChats(prevChats.data);
+	} catch (error) {
+		console.log(error);
+		showMessageDiv(error.response.data.msg);
+	}
+}
+
+async function DisplayPrevChats(chats) {
+	try {
+		let token = localStorage.getItem("token");
+		let curruser = parseJwt(token);
+		let chatDiv = document.querySelector("#chatDiv");
+		chatDiv.innerHTML = "";
+		for (let i = 0; i < chats.length; i++) {
+			let newpara = document.createElement("p");
+			if (chats[i].type == "text") {
+				if (chats[i].userId == curruser.userId) {
+					newpara.innerText = `You: ${chats[i].message}`;
+				} else {
+					newpara.innerText = `${chats[i].name}: ${chats[i].message}`;
+				}
+			} else {
+				let fileLink = document.createElement("a");
+				fileLink.href = chats[i].message;
+				fileLink.innerText = "click to See";
+
+				newpara.appendChild(document.createTextNode(`${chats[i].name}: `));
+				newpara.appendChild(fileLink);
+			}
+
+			chatDiv.appendChild(newpara);
 		}
 	} catch (error) {
 		console.log(error);

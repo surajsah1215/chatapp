@@ -22,9 +22,12 @@ const Group = require('./models/group')
 
 const userRoute = require('./routes/user')
 const groupRoute = require('./routes/group')
+const chatsRoute = require("./routes/chat");
+
 
 app.use(userRoute)
 app.use(groupRoute)
+app.use(chatsRoute)
 
 User.hasMany(Message)
 Message.belongsTo(User)
