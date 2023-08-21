@@ -250,6 +250,7 @@ async function sendMsg(e) {
 			let token = localStorage.getItem("token");
 			let groupId = localStorage.getItem("currentGroupId");
 			let response = await axios.post("http://localhost:3000/chat", { message: msg, groupId: groupId }, { headers: { authorization: token } });
+			console.log(response)
 			socket.emit("message", msg, response.data.data, groupId);
 		}
 	} catch (error) {

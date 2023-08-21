@@ -14,7 +14,7 @@ exports.addMsg = async(req,res,next)=>{
         type:'text'
       };
       await Message.create(obj);
-      res.status(200).json({ msg: "message sent", data: req.body.userName });
+      res.status(200).json({ msg: "message sent", data: req.user.name });
     } catch (error) {
       console.log(error);
       res.status(404).json({ msg: "message not sent", err: error });

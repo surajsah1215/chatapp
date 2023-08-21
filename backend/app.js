@@ -40,5 +40,5 @@ Message.belongsTo(Group)
 
 
 sequelize.sync()
- .then((response)=>app.listen(process.env.PORT||3000))
+ .then((response)=>http.listen(process.env.PORT||3000))
  .catch(err=>console.log(err))
